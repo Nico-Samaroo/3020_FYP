@@ -39,7 +39,7 @@ passport.use(
     async (payload, next) => {
       try {
         const user = await UserModel.findById(payload.id);
-        return next(null, user);
+        return next(null, user.withoutPassword());
       } catch (error) {
         return next(error);
       }

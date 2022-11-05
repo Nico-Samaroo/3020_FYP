@@ -1,13 +1,10 @@
 const { Router } = require("express");
-const passport = require("passport");
 const authRouter = require("./auth");
+const userRouter = require("./user");
 
 const apiRouter = Router();
 
-apiRouter.use('/auth',authRouter);
-
-const user = Router()
-user.get('/',(req,res)=>res.send("HELO"))
-apiRouter.use('/user',passport.authenticate('jwt',{session:false}),user)
+apiRouter.use("/auth", authRouter);
+apiRouter.use("/user", userRouter);
 
 module.exports = apiRouter;
