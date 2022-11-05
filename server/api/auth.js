@@ -7,6 +7,11 @@ const UserModel = require("../models/User");
 
 const authRouter = Router();
 
+const signJWT = (user) =>
+  sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "3d",
+  });
+
 authRouter.post("/login", (req, res) => {
   passport.authenticate("local", { session: false }, (err, user, info) => {
     if (err || !user)
@@ -14,10 +19,7 @@ authRouter.post("/login", (req, res) => {
 
     req.login(user, { session: false }, (err) => {
       if (err) res.status(500).send(err);
-      const token = sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "3d",
-      });
-      return res.json({ user: user.withoutPassword(), token });
+      return res.json({ user: user.withoutPassword(), token: signJWT(user) });
     });
   })(req, res);
 });
@@ -42,7 +44,7 @@ authRouter.post("/register", async (req, res) => {
       ...data,
       password: hashedPassword,
     });
-    return res.json({ user: user.withoutPassword() });
+    return res.json({ user: user.withoutPassword(), token: signJWT(user) });
   }
 });
 

@@ -53,14 +53,19 @@
 import { reactive, ref } from "vue";
 import { RouteName } from "../router";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
-import axios from '../axios';
+import axios from "../axios";
 import type { AxiosError } from "axios";
+import useAuthStore, { User } from "../stores/authStore";
+import { useRouter } from "vue-router";
 
 const fields = reactive({
   name: "",
   email: "",
   password: "",
 });
+
+const authStore = useAuthStore();
+const router = useRouter();
 
 const error = ref<null | "unfilled" | "email_exists" | "other">(null);
 
@@ -72,10 +77,12 @@ async function handleSubmit() {
   error.value = null;
 
   try {
-    const { data } = await axios.post(
+    const { data } = await axios.post<{ token: string; user: User }>(
       "/auth/register",
       fields
     );
+    authStore.saveUser(data.token, data.user);
+    router.push({ name: RouteName.DASHBOARD });
   } catch (err) {
     console.log(err);
     const errorResponse = (err as AxiosError<{ message: string } | null>)
